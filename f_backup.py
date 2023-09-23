@@ -12,12 +12,15 @@ ftp_subdir = 'pub'
 
 # ~/.local/share/applications/Firefox_backup.desktop
 # [Desktop Entry]
-# Version=1.0
+# Type=Application
+# Version=1.1
 # Name=Firefox backup
+# Comment=Backup bookmarks and launch Firerox
+# Path=/home/YOUR_USER_NAME/firefox_backup
 # Exec=python3 /home/YOUR_USER_NAME/firefox_backup/f_backup.py
 # Icon=firefox
 # Terminal=true
-# Type=Application
+# Categories=Network;
 
 import subprocess
 import os
