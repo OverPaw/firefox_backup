@@ -32,6 +32,18 @@ import re
 import ftplib
 import time
 
+class color:
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   DARKCYAN = '\033[36m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   YELLOW = '\033[93m'
+   RED = '\033[91m'
+   BOLD = '\033[1m'
+   UNDERLINE = '\033[4m'
+   END = '\033[0m'
+
 # https://stackoverflow.com/questions/6011235/run-a-program-from-python-and-have-it-continue-to-run-after-the-script-is-kille
 subprocess.Popen(['firefox'], preexec_fn=os.setpgrp)
 root = os.path.join(os.path.expanduser('~'), 'snap/firefox/common/.mozilla/firefox/') # ubuntu
@@ -45,9 +57,9 @@ for item in os.listdir(root):
   print(found_bookmarks)
   if os.path.isfile('bookmarks.html'): # local copy for track of changes
     if filecmp.cmp(found_bookmarks, 'bookmarks.html'):
-      print('no changes in bookmarks, so do abort')
+      print(color.RED + 'no changes in bookmarks, so do abort' + color.END)
       break
-  print('not exist or differ, so do backup')
+  print(color.GREEN + 'not exist or differ, so do backup' + color.END)
   
   print('converting bookmarks to clean HTML')
   now = datetime.now() # current date and time
