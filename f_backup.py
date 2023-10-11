@@ -3,9 +3,9 @@
 
 # CHANGE THE FOLOWING:
 ftp_server = '127.0.0.1'
-ftp_login = 'user'
+ftp_login = 'guest'
 ftp_pass = '123'
-ftp_subdir = 'pub'
+ftp_subdir = 'site_data'
 
 # for Python get Integrated Development and Learning Environment
 # sudo apt install idle3
@@ -55,29 +55,25 @@ for item in os.listdir(root):
   if not os.path.isfile(found_bookmarks):
     continue
   print(found_bookmarks)
-  if os.path.isfile('bookmarks.html'): # local copy for track of changes
-    if filecmp.cmp(found_bookmarks, 'bookmarks.html'):
-      print(color.RED + 'no changes in bookmarks, so do abort' + color.END)
-      break
-  print(color.GREEN + 'not exist or differ, so do backup' + color.END)
   
-  print('converting bookmarks to clean HTML')
-  now = datetime.now() # current date and time
-  locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
-  ts = now.strftime('%A, ').title() + now.strftime('%-d %B %Yг.')
-
-  shutil.copyfile(found_bookmarks, 'bookmarks.html')
-  in_file  = open("bookmarks.html", "r")
-  out_file = open("index.html", "w")
-
-  out_file.write('<html>\n<head>\n')
+  if os.path.isfile('interim_old.html'):
+    os.remove('interim_old.html')
+  if os.path.isfile('interim.html'):
+    shutil.copyfile('interim.html', 'interim_old.html')
+    os.remove('interim.html')
+  
+  print('converting bookmarks to clean HTML')  
+  in_file  = open(found_bookmarks, "r")
+  out_file = open("interim.html", "w")
   for line in in_file:
     if '<meta http-equiv="Content-Security-Policy"' in line:
       continue
     if '</meta>' in line:
       continue
+    if '<!DOCTYPE NETSCAPE-Bookmark-file-1>' in line:
+      out_file.write('<!DOCTYPE html>\n<html>\n<head>\n')
+      continue
     if '<H1>Bookmarks Menu</H1>' in line:
-      line = line.replace('Bookmarks Menu', ts)
       out_file.write('<style>UL {font-family: sans-serif;}</style>\n')
       out_file.write('</head>\n\n<body>\n')
     line = re.sub('(<A HREF=".*?").*?(>.*?</A>)', '\\1\\2', line)
@@ -86,6 +82,25 @@ for item in os.listdir(root):
     line = re.sub('<(/?)H3.*?>', '<\\1b>', line)
     out_file.write(line)
   out_file.write('</body>\n</html>')
+  in_file.close()
+  out_file.close()
+
+  if os.path.isfile('interim_old.html'):
+    if filecmp.cmp('interim.html', 'interim_old.html'):
+      print(color.RED + 'no changes in bookmarks, so do abort' + color.END)
+      break
+  print(color.GREEN + 'not exist or differ, so do backup' + color.END)
+
+  # final replace to add current date to the heading
+  now = datetime.now()
+  locale.setlocale(locale.LC_TIME, 'ru_RU.UTF-8')
+  ts = now.strftime('%A, ').title() + now.strftime('%-d %B %Yг.')
+  in_file  = open("interim.html", "r")
+  out_file = open("index.html", "w")
+  for line in in_file:
+    if '<H1>Bookmarks Menu</H1>' in line:
+      line = line.replace('Bookmarks Menu', ts)
+    out_file.write(line)
   in_file.close()
   out_file.close()
   
@@ -98,4 +113,3 @@ for item in os.listdir(root):
   ftp.quit()
 print('waiting 5 seconds')
 time.sleep(5)
-
